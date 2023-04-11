@@ -68,9 +68,6 @@ GEM
       tzinfo (~> 2.0)
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
-    annotate (3.2.0)
-      activerecord (>= 3.2, < 8.0)
-      rake (>= 10.4, < 14.0)
     ansi (1.5.0)
     ast (2.4.2)
     bcrypt (3.1.18)
@@ -138,6 +135,9 @@ GEM
     ipaddress (0.8.3)
     irb (1.5.1)
       reline (>= 0.3.0)
+    jbuilder (2.11.5)
+      actionview (>= 5.0.0)
+      activesupport (>= 5.0.0)
     json (2.6.2)
     jwt (2.7.0)
     loofah (2.19.0)
@@ -170,6 +170,8 @@ GEM
     net-smtp (0.3.3)
       net-protocol
     nio4r (2.5.8)
+    nokogiri (1.13.9-aarch64-linux)
+      racc (~> 1.4)
     nokogiri (1.13.9-x86_64-darwin)
       racc (~> 1.4)
     nokogiri (1.13.9-x86_64-linux)
@@ -278,11 +280,11 @@ GEM
     zeitwerk (2.6.6)
 
 PLATFORMS
+  aarch64-linux-musl
   x86_64-darwin-22
   x86_64-linux
 
 DEPENDENCIES
-  annotate
   bcrypt (~> 3.1.7)
   bootsnap
   carrierwave (~> 2.2, >= 2.2.3)
@@ -293,10 +295,12 @@ DEPENDENCIES
   fog-aws
   hirb (~> 0.7.3)
   hirb-unicode-steakknife (~> 0.0.9)
+  jbuilder
   jwt (~> 2.7)
   mime-types
   minitest-reporters (~> 1.5)
   mysql2 (~> 0.5)
+  nokogiri
   pry-byebug
   puma (~> 5.0)
   rack-cors

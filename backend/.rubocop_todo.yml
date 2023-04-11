@@ -198,7 +198,6 @@ Layout/FirstHashElementIndentation:
 Layout/HashAlignment:
   Exclude:
     - 'app/models/user.rb'
-    - 'lib/tasks/auto_annotate_models.rake'
 
 # Offense count: 48
 # This cop supports safe autocorrection (--autocorrect).

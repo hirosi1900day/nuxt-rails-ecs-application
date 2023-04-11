@@ -1,4 +1,4 @@
-FROM node:18.12.1-alpine
+FROM node:18.12.1
 # FROM node:18.12.1
 
 ARG HOMEDIR="app"
@@ -16,9 +16,7 @@ WORKDIR $HOMEDIR
 COPY package*.json ./
 COPY  .yarnrc ./
 
-RUN apk update && \
-    apk upgrade && \
-    npm install -g n && \
+RUN npm install -g n && \
     yarn install &&\
     rm -rf /var/cache/apk/*
 
