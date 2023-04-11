@@ -1,0 +1,136 @@
+
+version: 2.1
+
+orbs:
+    aws-ecr: circleci/aws-ecr@8.2.1
+    aws-ecs: circleci/aws-ecs@3.2.0
+
+jobs:
+    build:
+        machine:
+            image: ubuntu-2004:2022.10.1
+        steps:
+            - checkout
+            - run:
+                name: backend build
+                command: docker-compose -f ./backend/docker-compose.yml build
+            - run:
+                name: frontend build
+                command: docker-compose -f ./frontend/docker-compose.yml build
+
+    test:
+        machine:
+            image: ubuntu-2004:2022.10.1
+        steps:
+            - checkout
+            - run:
+                name: backend container
+                command: docker-compose -f ./backend/docker-compose.yml up -d
+            - run:
+                name: frontend container
+                command: docker-compose -f ./frontend/docker-compose.yml up -d
+            - run: sleep 20
+
+            # backend test
+            - run:
+                name: backend db create
+                command: docker-compose -f ./backend/docker-compose.yml run web rails db:create RAILS_ENV=test
+            - run:
+                name: backend db migrate
+                command: docker-compose -f ./backend/docker-compose.yml run web rails db:migrate RAILS_ENV=test
+            - run:
+                name: backend test
+                command: docker-compose -f ./backend/docker-compose.yml run web bundle exec rspec
+
+            # frontend test
+            - run:
+                name: frontend yarn install
+                command: docker-compose -f ./frontend/docker-compose.yml run frontend yarn install
+            - run:
+                name: frontend test
+                command: docker-compose -f ./frontend/docker-compose.yml run frontend yarn test
+
+            # down
+            - run:
+                name: frontend down
+                command: docker-compose -f ./frontend/docker-compose.yml down
+            - run:
+                name: backend down
+                command: docker-compose -f ./backend/docker-compose.yml down
+
+# 順序を整理
+workflows:
+    build_test_deploy:
+        jobs:
+            - build
+            - test:
+                requires:
+                    - build
+            - aws-ecr/build-and-push-image:
+                name: 'build-and-push-image-backend-nginx'
+                registry-id: AWS_ECR_REGISTRY_ID
+                repo: 'bestpra/backend-nginx'
+                region: '${AWS_REGION}'
+                tag: "${CIRCLE_SHA1}"
+                path: './backend/docker/nginx'
+                dockerfile: Dockerfile.cd
+                requires:
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - main
+            - aws-ecr/build-and-push-image:
+                name: 'build-and-push-image-backend-rails'
+                registry-id: AWS_ECR_REGISTRY_ID
+                repo: 'bestpra/backend-rails'
+                region: '${AWS_REGION}'
+                tag: "${CIRCLE_SHA1}"
+                path: './backend/docker/web'
+                dockerfile: Dockerfile.cd
+                requires:
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - main
+            - aws-ecr/build-and-push-image:
+                name: 'build-and-push-image-frontend'
+                registry-id: AWS_ECR_REGISTRY_ID
+                repo: 'bestpra/frontend'
+                region: '${AWS_REGION}'
+                tag: "${CIRCLE_SHA1}"
+                path: './frontend'
+                dockerfile: Dockerfile.circleci
+                requires:
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - main
+            - aws-ecs/deploy-service-update:
+                cluster:  '${MY_APP_PREFIX}-cluster'
+                family: '${FAMILY_NAME_BACKEND}'
+                service-name: '${SERVICE_NAME_BACKEND}'
+                container-image-name-updates: 'container=${CONTAINER_MIDDLEWARE_NAME},tag=${CIRCLE_SHA1},container=${CONTAINER_APP_NAME},tag=${CIRCLE_SHA1}'
+                requires:
+                    - 'build-and-push-image-backend-nginx'
+                    - 'build-and-push-image-backend-rails'
+                    - 'build-and-push-image-frontend'
+                filters:
+                    branches:
+                        only:
+                            - main
+            - aws-ecs/deploy-service-update:
+                cluster:  '${MY_APP_PREFIX}-cluster'
+                family: '${FAMILY_NAME_FRONTEND}'
+                service-name: '${SERVICE_NAME_FRONTEND}'
+                container-image-name-updates: 'container=${CONTAINER_FRONTEND_NAME},tag=${CIRCLE_SHA1}'
+                requires:
+                    - 'build-and-push-image-backend-nginx'
+                    - 'build-and-push-image-backend-rails'
+                    - 'build-and-push-image-frontend'
+                filters:
+                    branches:
+                        only:
+                            - main
