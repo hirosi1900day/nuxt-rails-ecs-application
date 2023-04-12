@@ -1,26 +1,14 @@
-FROM node:18.12.1
-# FROM node:18.12.1
+FROM node:18.15.0
 
 ARG HOMEDIR="app"
 
 ENV HOME=/$HOMEDIR \
     LANG=C.UTF-8 \
     TZ=Asia/Tokyo \
-    # コンテナのnuxt.jsをブラウザから参照するため
     HOST=0.0.0.0
 
-# RUN echo $HOMEDIR
-# RUN echo $CONTAINER_PORT
-
 WORKDIR $HOMEDIR
-COPY package*.json ./
-COPY  .yarnrc ./
 
-RUN npm install -g n && \
-    yarn install &&\
-    rm -rf /var/cache/apk/*
+COPY . .
 
-COPY ./ ./
-
-# EXPOSE 3000
-# CMD ["yarn", "run", "dev"]
+RUN yarn install
