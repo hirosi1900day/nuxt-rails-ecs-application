@@ -280,6 +280,7 @@ GEM
     zeitwerk (2.6.6)
 
 PLATFORMS
+  aarch64-linux
   aarch64-linux-musl
   x86_64-darwin-22
   x86_64-linux
@@ -299,8 +300,7 @@ DEPENDENCIES
   jwt (~> 2.7)
   mime-types
   minitest-reporters (~> 1.5)
-  mysql2 (~> 0.5)
-  nokogiri
+  mysql2
   pry-byebug
   puma (~> 5.0)
   rack-cors

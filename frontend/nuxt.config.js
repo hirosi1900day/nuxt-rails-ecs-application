@@ -84,7 +84,7 @@ export default {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
     // baseURL: '/',
     // baseURL: 'http://localhost:3000'
-    baseURL: process.env.NODE_ENV === 'production' ? 'https://api.best-pra.com' : 'http://localhost:3000',
+    baseURL: process.env.NODE_ENV === 'production' ? '本番ドメイン' : 'http://localhost',
 
     // credentials => session情報をRailsと共有する(クロスドメインで認証情報を共有)
     // Doc:https://axios.nuxtjs.org/options/#credentials

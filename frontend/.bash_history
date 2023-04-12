@@ -54,3 +54,6 @@ yarn test
 exit
 yarn add @nuxtjs/i18n
 exit
+yarn dev
+yarn dev
+exit

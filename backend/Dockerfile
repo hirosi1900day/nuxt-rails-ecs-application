@@ -10,17 +10,10 @@ RUN apt-get update && apt-get install -y build-essential libpq-dev nodejs chromi
 
 # Dockerfile内で使用する変数を定義
 # app
-ARG WORKDIR
 
 # 環境変数を定義(Dockerfile, コンテナ参照可)
 # Rails ENV["TZ"] => Asia/Tokyo
-ENV HOME=/${WORKDIR} \
-    LANG=C.UTF-8 \
-    TZ=Asia/Tokyo
-
-# ベースイメージに対してコマンドを実行する
-# ${HOME} or $HOME => /app
-RUN echo ${HOME}
+ENV HOME /myapp
 
 # Dockerfile内で指定した命令を実行する ... RUN, COPY, ADD, ENTORYPOINT, CMD
 # 作業ディレクトリを定義
@@ -43,9 +36,4 @@ COPY entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
 
-# コンテナ内で実行したいコマンドを定義
-# -b ... バインド。プロセスを指定したip(0.0.0.0)アドレスに紐付け(バインド)する
-CMD ["rails", "server", "-b", "0.0.0.0"]
-
-# ホスト(PC)       | コンテナ
-# ブラウザ(外部)   | Rails
+CMD /bin/bash -c "rm -f tmp/pids/server.pid && bundle exec rails s"
